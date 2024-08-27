@@ -1,0 +1,13 @@
+{
+	"autodeskProduct":	"Fusion",
+	"type":	"addin",
+	"id":	"b8eb19f7-3d3e-432a-9a70-6a9b357858f1",
+	"author":	"JadeInTheSky",
+	"description":	{
+		"":	"simple discord rich presence add-in"
+	},
+	"version":	"0.0.1",
+	"runOnStartup":	false,
+	"supportedOS":	"windows|mac",
+	"editEnabled":	true
+}
