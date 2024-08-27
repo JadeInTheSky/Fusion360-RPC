@@ -1,11 +1,14 @@
 # Assuming you have not changed the general structure of the template no modification is needed in this file.
 from . import commands
 from .lib import fusionAddInUtils as futil
-import adsk.core, adsk.fusion, adsk.cam, traceback
+import adsk.core, adsk.fusion, adsk.cam
 from .modules import pypresence 
 import time
+import threading
 
+thread = None
 client_id = '1278012634247200880'
+keep_running = True
 RPC = pypresence.Presence(client_id) 
 RPC.connect()
 
@@ -14,24 +17,35 @@ ui = app.userInterface
 
 def run(context):
     try:
+        global thread
         # This will run the start function in each of your commands as defined in commands/__init__.py
         commands.start()
+        thread = threading.Thread(target=read)
+        thread.start()
+        print("Fusion360-RPC successfully started")
     except:
         futil.handle_error('run')
 
 def read():
-    while True:
+    global keep_running
+    print("read")
+    while keep_running:
         update_rpc()
-        time.sleep(500)
+        time.sleep(5)
 
 def stop(context):
     try:
+        global keep_running
+        global thread
         # Remove all of the event handlers your app has created
         futil.clear_handlers()
 
         # This will run the start function in each of your commands as defined in commands/__init__.py
         commands.stop()
         RPC.close()
+        keep_running = False
+        thread.join()
+        print("Fusion360-RPC successfully stopped")
 
     except:
         futil.handle_error('stop')
@@ -42,12 +56,12 @@ def get_project_name():
         project = dataFile.parentProject
         return project.name if project else "Not in a project"
     except: 
-        return "Unknown project"
+        return "Not in a project"
     
 def get_item_name():
     try:
         document = app.activeDocument
-        return document.name if document else "Not in a document"
+        return document.name if document else "Unknown Item"
     except:
         return "Unknown Item"
 

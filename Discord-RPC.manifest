@@ -7,7 +7,7 @@
 		"":	"simple discord rich presence add-in"
 	},
 	"version":	"0.0.1",
-	"runOnStartup":	false,
+	"runOnStartup":	true,
 	"supportedOS":	"windows|mac",
-	"editEnabled":	true
+	"editEnabled":	false
 }
