@@ -1,28 +1,31 @@
 # Assuming you have not changed the general structure of the template no modification is needed in this file.
 from . import commands
 from .lib import fusionAddInUtils as futil
-import adsk.core, adsk.fusion, adsk.cam
+import adsk.core, adsk.fusion, adsk.cam, traceback
 from .modules import pypresence 
 import time
 import threading
 
 thread = None
-client_id = '1278012634247200880'
+client_id = '1278096004993912912'
 keep_running = True
 RPC = pypresence.Presence(client_id) 
 RPC.connect()
 
 app = adsk.core.Application.get()
 ui = app.userInterface
+textPalette = ui.palettes.itemById('TextCommands')
 
 def run(context):
     try:
         global thread
         # This will run the start function in each of your commands as defined in commands/__init__.py
         commands.start()
+        textPalette.writeText("Fusion360-RPC successfully started")
+
         thread = threading.Thread(target=read)
         thread.start()
-        print("Fusion360-RPC successfully started")
+        
     except:
         futil.handle_error('run')
 
@@ -45,7 +48,7 @@ def stop(context):
         RPC.close()
         keep_running = False
         thread.join()
-        print("Fusion360-RPC successfully stopped")
+        textPalette.writeText("Fusion360-RPC successfully stopped")
 
     except:
         futil.handle_error('stop')
@@ -64,6 +67,11 @@ def get_item_name():
         return document.name if document else "Unknown Item"
     except:
         return "Unknown Item"
+    
+def get_component_name():
+    design = app.activeProduct
+    activeComponent = design.activeComponent
+    return activeComponent
 
 
 def update_rpc():
