@@ -1,5 +1,5 @@
 # Assuming you have not changed the general structure of the template no modification is needed in this file.
-from . import commands
+# from . import commands
 from .lib import fusionAddInUtils as futil
 import adsk.core, adsk.fusion, adsk.cam, traceback
 from .modules import pypresence 
@@ -11,16 +11,30 @@ client_id = '1278096004993912912'
 keep_running = True
 RPC = pypresence.Presence(client_id) 
 RPC.connect()
+start_time = time.time()
 
 app = adsk.core.Application.get()
 ui = app.userInterface
 textPalette = ui.palettes.itemById('TextCommands')
 
+class UiLogger:
+    def __init__(self, forceUpdate):
+        palettes = ui.palettes
+        self.textPalette = palettes.itemById("TextCommands")
+        self.forceUpdate = forceUpdate
+        self.textPalette.isVisible = True 
+    
+    def print(self, text):       
+        self.textPalette.writeText(text)
+        if (self.forceUpdate):
+            adsk.doEvents() 
+
+logger = UiLogger(True)
+
 def run(context):
     try:
         global thread
         # This will run the start function in each of your commands as defined in commands/__init__.py
-        commands.start()
         textPalette.writeText("Fusion360-RPC successfully started")
 
         thread = threading.Thread(target=read)
@@ -44,7 +58,6 @@ def stop(context):
         futil.clear_handlers()
 
         # This will run the start function in each of your commands as defined in commands/__init__.py
-        commands.stop()
         RPC.close()
         keep_running = False
         thread.join()
@@ -73,11 +86,29 @@ def get_component_name():
     activeComponent = design.activeComponent
     return activeComponent
 
+def get_active_workspace():
+    workspace = ui.activeWorkspace
+    return workspace.name
 
 def update_rpc():
+    workspace = get_active_workspace()
+
     RPC.update(
         state=f"Working on: {get_item_name()}",  # This will appear as the second line
         details=f"Project: {get_project_name()}",  # This will appear as the first line
         large_image="fusion360-logo",  # The key of the large image you uploaded
         large_text="Autodesk Fusion360",  # Text displayed when hovering over the large image
+        small_image=f"https://raw.githubusercontent.com/NoAccount1/Fusion360-RPC/refs/heads/feature/time/res/{workspace}.png",
+        small_text=f"{workspace}",
+        start=start_time, # Time of activity start
     )
+
+
+# Animation
+# Design
+# Drawing
+# Electronics
+# Manufacture
+# Render
+# Simulation
+# Generative design
